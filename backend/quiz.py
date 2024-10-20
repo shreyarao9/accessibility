@@ -7,6 +7,7 @@ import json
 
 # Download NLTK data files (if not already done)
 nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('stopwords')
 
