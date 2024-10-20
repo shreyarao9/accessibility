@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from tts import TTS
+from quiz import get_quiz_as_json
+from summarization import summarize_text_as_json
 
 app = FastAPI()
 tts_instance = TTS()
@@ -35,13 +37,17 @@ async def to_text():
     return output_text
 
 @app.post("/summarize/")
-async def summarizer():
-    #implement
-    output_text = ''
-    return output_text
+async def summarize(text: str, n: int = 3):
+    if not text:
+        raise HTTPException(status_code=400, detail="Text must not be empty.")
+    
+    # Generate the summary as JSON
+    summary_json = summarize_text_as_json(text, n)
+
+    # Return the JSON response
+    return JSONResponse(content=summary_json)
 
 @app.post("/quizmaker/")
-async def quiz():
-    #implement
-    output_text = ''
-    return output_text
+async def quiz(text: str, num_questions: int = 3):
+    quiz_json = get_quiz_as_json(text, num_questions)
+    return JSONResponse(content=quiz_json)

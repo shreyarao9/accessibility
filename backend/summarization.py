@@ -2,6 +2,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from string import punctuation
+import json
 
 # Download NLTK data files (if not already done)
 nltk.download('punkt')
@@ -27,13 +28,10 @@ def summarize_text(text, n=3):
 
     for word in word_tokenize(text.lower()):
         if word not in stop_words:
-            if word in word_frequencies:
-                word_frequencies[word] += 1
-            else:
-                word_frequencies[word] = 1
+            word_frequencies[word] = word_frequencies.get(word, 0) + 1
 
     # Calculate the maximum word frequency
-    max_frequency = max(word_frequencies.values())
+    max_frequency = max(word_frequencies.values(), default=1)
 
     # Normalize the word frequencies by dividing by the maximum frequency
     for word in word_frequencies.keys():
@@ -44,10 +42,7 @@ def summarize_text(text, n=3):
     for sentence in sentences:
         for word in word_tokenize(sentence.lower()):
             if word in word_frequencies:
-                if sentence not in sentence_scores:
-                    sentence_scores[sentence] = word_frequencies[word]
-                else:
-                    sentence_scores[sentence] += word_frequencies[word]
+                sentence_scores[sentence] = sentence_scores.get(sentence, 0) + word_frequencies[word]
 
     # Sort the sentences by their scores and select the top n sentences
     summarized_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:n]
@@ -56,16 +51,16 @@ def summarize_text(text, n=3):
     summary = ' '.join(summarized_sentences)
     return summary
 
-# Dynamic text input from the user
-text = input("Enter the text to summarize:\n")
+def summarize_text_as_json(text, n=3):
+    """
+    Summarize text and return the summary as a JSON object.
 
-# Dynamic number of sentences for the summary
-try:
-    n = int(input("Enter the number of sentences for the summary (default is 3):\n"))
-except ValueError:
-    n = 3  # Default value if invalid input
+    Args:
+        text (str): The text to summarize.
+        n (int): The number of sentences to extract (default is 3).
 
-# Generate and display the summary
-summary = summarize_text(text, n)
-print("\nSummary:")
-print(summary)
+    Returns:
+        str: A JSON string containing the summary.
+    """
+    summary = summarize_text(text, n)
+    return json.dumps({"summary": summary})

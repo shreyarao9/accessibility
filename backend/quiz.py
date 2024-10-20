@@ -3,6 +3,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from nltk import pos_tag
 import random
+import json
 
 # Download NLTK data files (if not already done)
 nltk.download('punkt')
@@ -63,21 +64,29 @@ def generate_mcq_quiz(text, num_questions=3, num_choices=4):
 
     return quiz
 
+def get_quiz_as_json(text, num_questions=3):
+    """
+    Generate an MCQ quiz and return it as a JSON object.
+
+    Args:
+        text (str): The text to create the quiz from.
+        num_questions (int): The number of quiz questions to generate (default is 3).
+
+    Returns:
+        str: A JSON string representing the quiz.
+    """
+    quiz = generate_mcq_quiz(text, num_questions)
+    return json.dumps({"quiz": quiz}, indent=2)
+
 # Example usage
-text = """
-Natural language processing (NLP) is a field of artificial intelligence that focuses on the interaction between computers and humans through natural language. 
-The ultimate objective of NLP is to read, decipher, understand, and make sense of human languages in a manner that is valuable. 
-Most NLP techniques rely on machine learning to derive meaning from human languages.
-Natural language processing is widely used for sentiment analysis, language translation, and text summarization.
-"""
+if __name__ == "__main__":
+    text = """
+    Natural language processing (NLP) is a field of artificial intelligence that focuses on the interaction between computers and humans through natural language. 
+    The ultimate objective of NLP is to read, decipher, understand, and make sense of human languages in a manner that is valuable. 
+    Most NLP techniques rely on machine learning to derive meaning from human languages.
+    Natural language processing is widely used for sentiment analysis, language translation, and text summarization.
+    """
 
-# Generate the MCQ quiz
-quiz = generate_mcq_quiz(text, num_questions=3)
-
-# Display the quiz questions
-print("MCQ Quiz:")
-for idx, q in enumerate(quiz, 1):
-    print(f"{idx}. {q['question']}")
-    for i, option in enumerate(q['options']):
-        print(f"   {chr(65+i)}. {option}")
-    print(f"Answer: {q['answer']}\n")
+    # Generate the MCQ quiz as JSON
+    quiz_json = get_quiz_as_json(text, num_questions=3)
+    print(quiz_json)
