@@ -14,33 +14,36 @@ tts_instance = TTS()
 async def speak(text: str, dest_lang: str = "en", translate: bool = False, voice_id: int = 0, speed: int = 150):
     if not text:
         raise HTTPException(status_code=400, detail="Text must not be empty.")
-    
+
     # Translate text if needed
     if translate:
         text = tts_instance.translate_text(text, dest_lang)
-    
+
     # Check if the destination language is supported
     if dest_lang not in TTS.SUPPORTED_LANGUAGES:
         raise HTTPException(status_code=400, detail="Unsupported language.")
-    
+
     # Create temporary file to store audio data
     try:
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio:
+            temp_audio_path = temp_audio.name  # Store the temp file path
             # Generate speech from text
             tts_instance.generate_speech_to_file(text, voice_id, speed, temp_audio.name)
-        
-        # Read the generated audio into memory for streaming
-        with open(temp_audio.name, 'rb') as f:
-            audio_io = io.BytesIO(f.read())
-        
-        # Optionally, delete the temporary file after use
-        os.remove(temp_audio.name)
 
-        return StreamingResponse(audio_io, media_type='audio/wav')
-    
+        # Read the generated audio file into memory for streaming
+        with open(temp_audio_path, 'rb') as f:
+            audio_data = f.read()
+
+        # Stream the audio data
+        return StreamingResponse(io.BytesIO(audio_data), media_type='audio/wav')
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating speech: {str(e)}")
 
+    finally:
+        # Cleanup the temporary file after response
+        if os.path.exists(temp_audio_path):
+            os.remove(temp_audio_path)
 
 @app.get("/tts/voices/")
 async def get_voices():
