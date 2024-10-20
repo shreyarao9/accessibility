@@ -28,11 +28,12 @@ def extract_important_words(paragraph, top_n=5):
     return [word for word, score in important_words[:top_n]]
 
 # Example usage
-paragraph = """
-Machine learning is a method of data analysis that automates analytical model building.
-It is a branch of artificial intelligence based on the idea that systems can learn from data,
-identify patterns, and make decisions with minimal human intervention.
-"""
+# if __name__ == "__main__":
+#     paragraph = """
+#     Machine learning is a method of data analysis that automates analytical model building.
+#     It is a branch of artificial intelligence based on the idea that systems can learn from data,
+#     identify patterns, and make decisions with minimal human intervention.
+#     """
 
-important_words = extract_important_words(paragraph, top_n=5)
-print("Important words:", important_words)
+#     important_words = extract_important_words(paragraph, top_n=5)
+#     print("Important words:", important_words)

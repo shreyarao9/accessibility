@@ -7,7 +7,6 @@ import json
 
 # Download NLTK data files (if not already done)
 nltk.download('punkt')
-nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('stopwords')
 
@@ -74,10 +73,10 @@ def get_quiz_as_json(text, num_questions=3):
         num_questions (int): The number of quiz questions to generate (default is 3).
 
     Returns:
-        str: A JSON string representing the quiz.
+        dict: A dictionary representing the quiz.
     """
     quiz = generate_mcq_quiz(text, num_questions)
-    return json.dumps({"quiz": quiz}, indent=2)
+    return {"quiz": quiz}
 
 # Example usage
 if __name__ == "__main__":
@@ -88,6 +87,8 @@ if __name__ == "__main__":
     Natural language processing is widely used for sentiment analysis, language translation, and text summarization.
     """
 
-    # Generate the MCQ quiz as JSON
+    # Generate the MCQ quiz as a JSON object (without newline characters or escape sequences)
     quiz_json = get_quiz_as_json(text, num_questions=3)
-    print(quiz_json)
+    
+    # Print the result in a clean JSON format
+    print(json.dumps(quiz_json, indent=2))  # Use 'json.dumps' to display in pretty JSON format (optional)
