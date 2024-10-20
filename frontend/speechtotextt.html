@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder</title>
+</head>
+<body>
+    <h1>Record Audio</h1>
+    <button id="record">Start Recording</button>
+    <button id="upload">Upload to Backend</button>
+    <audio id="audio" controls></audio>
+
+    <script>
+        let chunks = [];
+        let recorder;
+        let db;
+
+        // Open IndexedDB
+        const request = indexedDB.open('audioDB', 1);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            db.createObjectStore('audios', { autoIncrement: true });
+        };
+
+        request.onsuccess = event => {
+            db = event.target.result;
+        };
+
+        // Start Recording
+        document.getElementById('record').onclick = async function () {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = async () => {
+                const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
+                saveAudioToCache(audioBlob);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('audio').src = audioUrl;
+                chunks = [];
+            };
+            setTimeout(() => recorder.stop(), 5000);  // Automatically stop after 5 seconds
+        };
+
+        // Save audio to IndexedDB cache
+        function saveAudioToCache(audioBlob) {
+            const transaction = db.transaction(['audios'], 'readwrite');
+            const store = transaction.objectStore('audios');
+            store.add(audioBlob);
+        }
+
+        // Upload to Backend
+        document.getElementById('upload').onclick = async function () {
+            const transaction = db.transaction(['audios'], 'readonly');
+            const store = transaction.objectStore('audios');
+            const request = store.get(1);  // Assuming we use the first audio (change logic as needed)
+
+            request.onsuccess = async function () {
+                const audioBlob = request.result;
+                if (audioBlob) {
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'audio.mp3');
+                    
+                    // Upload to your backend
+                    await fetch('YOUR_BACKEND_ENDPOINT', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    alert('Audio uploaded successfully');
+                } else {
+                    alert('No audio to upload');
+                }
+            };
+        };
+    </script>
+</body>
+</html>
