@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder</title>
+</head>
+<body>
+    <h1>Record Audio</h1>
+    <button id="record">Start Recording</button>
+    <button id="upload">Upload to Backend</button>
+    <audio id="audio" controls></audio>
+
+    
+    <div class="diagram" style="padding: 20px;">
+        <textarea>blah</textarea><br>
+        <input type="button" id="attack_me" value="Generate"></input>
+        <div class="result" style="display: none;" id="die">
+            <pre class="mermaid" id="draw_diagram">
+
+            </pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        import { GoogleGenerativeAI } from "https://google/g/generative-ai";
+        function ForGotham(){
+            console.log("die bitch")
+            //const {
+            //    GoogleGenerativeAI,
+            //    HarmCategory,
+            //    HarmBlockThreshold,
+            //} = require("@google/generative-ai");
+            //import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from 'URL_TO_THE_GenerativeAI_LIBRARY';
+
+            const apiKey = AIzaSyBE8nWlinmyPoMfQYpLvPjv670ff0PrnzQ;
+            const genAI = new GoogleGenerativeAI(apiKey);
+
+            const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            });
+
+            const generationConfig = {
+                temperature: 1,
+                topP: 0.95,
+                topK: 64,
+                maxOutputTokens: 8192,
+                responseMimeType: "text/plain",
+            };
+
+            async function run() {
+            const chatSession = model.startChat({
+                generationConfig,
+                history: [
+                ],
+            });
+
+            const prompt = document.getElementById("prompt").value;
+
+            const result = await chatSession.sendMessage("Generate Only a mermaid.js prompt without explanation for creating diagrams based on the following text:\n\""+prompt+"\"");
+            document.getElementById("draw_diagram").value=result.response.text();
+            console.log(result.response.text());
+            
+            }
+
+            run()
+            mermaid.initialize({ startOnLoad: true });
+            document.getElementById("die").style.display="block";
+        }
+        document.getElementById("attack_me").onclick=ForGotham();
+    </script>
+
+    <script>
+        let chunks = [];
+        let recorder;
+        let db;
+
+        // Open IndexedDB
+        const request = indexedDB.open('audioDB', 1);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            db.createObjectStore('audios', { autoIncrement: true });
+        };
+
+        request.onsuccess = event => {
+            db = event.target.result;
+        };
+
+        // Start Recording
+        document.getElementById('record').onclick = async function () {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = async () => {
+                const audioBlob = new Blob(chunks, { type: 'audio/mp3' });
+                saveAudioToCache(audioBlob);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById('audio').src = audioUrl;
+                chunks = [];
+            };
+            setTimeout(() => recorder.stop(), 5000);  // Automatically stop after 5 seconds
+        };
+
+        // Save audio to IndexedDB cache
+        function saveAudioToCache(audioBlob) {
+            const transaction = db.transaction(['audios'], 'readwrite');
+            const store = transaction.objectStore('audios');
+            store.add(audioBlob);
+        }
+
+        // Upload to Backend
+        document.getElementById('upload').onclick = async function () {
+            const transaction = db.transaction(['audios'], 'readonly');
+            const store = transaction.objectStore('audios');
+            const request = store.get(1);  // Assuming we use the first audio (change logic as needed)
+
+            request.onsuccess = async function () {
+                const audioBlob = request.result;
+                if (audioBlob) {
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'audio.mp3');
+                    
+                    // Upload to your backend
+                    await fetch('YOUR_BACKEND_ENDPOINT', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    alert('Audio uploaded successfully');
+                } else {
+                    alert('No audio to upload');
+                }
+            };
+        };
+    </script>
+</body>
+</html>
+<script>
+    arr=["asdasd","adasdasd","asdasdasd"]
+    let i;
+    var joinedText=`\n`
+    for(i=0;i<arr.length-1;i++){
+        joinedText+=arr[i]+`\n`
+    }
+    joinedText+=`arr[i]`;
+console.log(joinedText);
+</script>#include <algorithm>
