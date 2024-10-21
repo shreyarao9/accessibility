@@ -6,6 +6,7 @@ import os
 from .tts_script import TTS
 from .quiz import get_quiz_as_json
 from .summarization import summarize_text_as_json
+from .genprompt import generate_prompt_as_json
 
 app = FastAPI()
 tts_instance = TTS()
@@ -73,3 +74,8 @@ async def summarize(text: str, n: int = 3):
 async def quiz(text: str, num_questions: int = 3):
     quiz_json = get_quiz_as_json(text, num_questions)
     return JSONResponse(content=quiz_json)
+
+@app.post("/genprompt/")
+async def genprompt(text: str):
+    prompt_json = generate_prompt_as_json(text)
+    return JSONResponse(prompt_json)
